@@ -4,6 +4,7 @@
 Created on Fri Oct 13 15:15:35 2023
 
 @author: diego
+
 """
 
 import torch  # 🔥 Import PyTorch for deep learning
@@ -19,10 +20,10 @@ import re  # 🧵 Regular expressions for text processing
 from tqdm import tqdm  # 🔄 tqdm for progress bar display
 
 
-DATA_DIR = Path("/home/diego/Documents/master/fundamentals_of_data_analytics/kaggle")  # 📂 Directory for dataset
-TRAIN_CSV = DATA_DIR / "mini_train_data.csv"  # 🚆 Training data in CSV format
+DATA_DIR = Path("/home/maqiao/Data/kaggle/stanford-ribonanza-rna-folding")  # 📂 Directory for dataset
+TRAIN_CSV = DATA_DIR / "train_data.csv"  # 🚆 Training data in CSV format
 TRAIN_PARQUET_FILE = "train_data.parquet"  # 📦 Training data in Parquet format
-TEST_CSV = DATA_DIR / "mini_test_sequences.csv"  # 🚀 Test sequences in CSV format
+TEST_CSV = DATA_DIR / "test_sequences.csv"  # 🚀 Test sequences in CSV format
 TEST_PARQUET_FILE = "test_sequences.parquet"  # 📦 Test sequences in Parquet format
 PRED_CSV = "submission.csv"  # 📄 Output file for predictions
 
@@ -156,8 +157,8 @@ val_size = len(full_train_dataset) - train_size
 train_dataset, val_dataset = random_split(full_train_dataset, [train_size, val_size],generator1)
 
 
-train_dataloader = DataLoader(train_dataset, batch_size=2, shuffle=True, num_workers=2)  # 📦 Training data loader
-val_dataloader = DataLoader(val_dataset, batch_size=2, shuffle=False, num_workers=2)  # 📦 Validation data loader
+train_dataloader = DataLoader(train_dataset, batch_size=1024, shuffle=True, num_workers=8)  # 📦 Training data loader
+val_dataloader = DataLoader(val_dataset, batch_size=1024, shuffle=False, num_workers=8)  # 📦 Validation data loader
 
 
 
