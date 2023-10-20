@@ -17,7 +17,7 @@ from sklearn.preprocessing import OneHotEncoder  # 🧬 Scikit-Learn for one-hot
 import polars as pl  # 📊 Polars for data manipulation
 import re  # 🧵 Regular expressions for text processing
 from tqdm import tqdm  # 🔄 tqdm for progress bar display
-
+import os
 
 DATA_DIR = Path("/home/diego/Documents/master/fundamentals_of_data_analytics/kaggle")  # 📂 Directory for dataset
 TRAIN_CSV = DATA_DIR / "mini_train_data.csv"  # 🚆 Training data in CSV format
@@ -238,6 +238,12 @@ for epoch in range(n_epochs):
         val_losses.append(loss.detach().cpu().numpy())
         val_maes.append(mae.detach().cpu().numpy())
         pbar.set_description(f"Validation loss {loss.detach().cpu().numpy():.4f}")
+        
+        torch.save({"epoch": epoch + 1,
+                "state_dict": model.state_dict(),
+                "optimizer": optimizer.state_dict(),
+                },
+                os.path.join(f"model_epoch_{epoch}.pth.tar"))
     
     # 📊 Print average validation loss and MAE for the epoch
     print(f"Epoch {epoch} val loss: ", np.mean(val_losses))
