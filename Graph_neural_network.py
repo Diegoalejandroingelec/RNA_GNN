@@ -18,7 +18,7 @@ from sklearn.preprocessing import OneHotEncoder  # 🧬 Scikit-Learn for one-hot
 import polars as pl  # 📊 Polars for data manipulation
 import re  # 🧵 Regular expressions for text processing
 from tqdm import tqdm  # 🔄 tqdm for progress bar display
-import os
+
 
 DATA_DIR = Path("/home/maqiao/Data/kaggle/stanford-ribonanza-rna-folding")  # 📂 Directory for dataset
 TRAIN_CSV = DATA_DIR / "train_data.csv"  # 🚆 Training data in CSV format
@@ -151,7 +151,7 @@ full_train_dataset = SimpleGraphDataset(parquet_name=TRAIN_PARQUET_FILE, edge_di
 generator1 = torch.Generator().manual_seed(42)  # 🌱 Initialize random seed generator
 
 # Assuming full_train_dataset is a valid PyTorch dataset
-train_size = int(0.7 * len(full_train_dataset))
+train_size = int(0.9 * len(full_train_dataset))
 val_size = len(full_train_dataset) - train_size
 
 train_dataset, val_dataset = random_split(full_train_dataset, [train_size, val_size],generator1)
@@ -195,7 +195,7 @@ model = EdgeCNN(
 
 
 
-n_epochs = 15
+n_epochs = 50
 
 # 📈 Define the optimizer with learning rate and weight decay
 optimizer = torch.optim.Adam(model.parameters(), lr=0.0003, weight_decay=5e-4)
@@ -240,11 +240,11 @@ for epoch in range(n_epochs):
         val_maes.append(mae.detach().cpu().numpy())
         pbar.set_description(f"Validation loss {loss.detach().cpu().numpy():.4f}")
         
-        torch.save({"epoch": epoch + 1,
+    torch.save({"epoch": epoch + 1,
                 "state_dict": model.state_dict(),
                 "optimizer": optimizer.state_dict(),
                 },
-                os.path.join(f"model_epoch_{epoch}.pth.tar"))
+                f"model_epoch_{epoch}.pth.tar")
     
     # 📊 Print average validation loss and MAE for the epoch
     print(f"Epoch {epoch} val loss: ", np.mean(val_losses))
