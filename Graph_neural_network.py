@@ -186,11 +186,13 @@ from torch_geometric.nn.models import EdgeCNN
 # 🛠️ Set the device to GPU if available, otherwise use CPU
 device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
 # 🏗️ Initialize the EdgeCNN model with specified parameters
+dropout_r = 0.5
 model = EdgeCNN(
     in_channels=full_train_dataset.num_features,  # 📊 Input features determined by the dataset
     hidden_channels=128,  # 🕳️ Number of hidden channels in the model
     num_layers=4,  # 🧱 Number of layers in the model
-    out_channels=1  # 📤 Number of output channels
+    out_channels=1,  # 📤 Number of output channels
+    dropout = dropout_r # dropout rate - 0.0 by default.
 ).to(device)  # 🏗️ Move the model to the selected device (GPU or CPU)
 
 
@@ -199,6 +201,12 @@ n_epochs = 50
 
 # 📈 Define the optimizer with learning rate and weight decay
 optimizer = torch.optim.Adam(model.parameters(), lr=0.0003, weight_decay=5e-4)
+
+
+import calendar
+import time
+
+
 
 # 🚂 Iterate over epochs
 for epoch in range(n_epochs):
@@ -239,12 +247,18 @@ for epoch in range(n_epochs):
         val_losses.append(loss.detach().cpu().numpy())
         val_maes.append(mae.detach().cpu().numpy())
         pbar.set_description(f"Validation loss {loss.detach().cpu().numpy():.4f}")
-        
-    torch.save({"epoch": epoch + 1,
+    
+    
+    # instead of saving each epoch, we save every 5 epoches. [later, we could save a copy of the best one]    
+    if epoch % 5 == 0:
+        current_GMT = time.gmtime()
+        time_stamp = calendar.timegm(current_GMT)
+		
+        torch.save({"epoch": epoch + 1,
                 "state_dict": model.state_dict(),
                 "optimizer": optimizer.state_dict(),
                 },
-                f"model_epoch_{epoch}.pth.tar")
+                f"GNN_locally_fully_connected_epoch_{epoch}_{EDGE_DISTANCE}_{time_stamp}_{dropout_r}.pth.tar")
     
     # 📊 Print average validation loss and MAE for the epoch
     print(f"Epoch {epoch} val loss: ", np.mean(val_losses))
