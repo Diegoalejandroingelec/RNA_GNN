@@ -19,6 +19,8 @@ import polars as pl  # 📊 Polars for data manipulation
 import re  # 🧵 Regular expressions for text processing
 from tqdm import tqdm  # 🔄 tqdm for progress bar display
 import os
+# 📉 Define loss functions for training and evaluation
+import torch.nn.functional as F
 from torch_geometric.nn.models import EdgeCNN
 from torch.utils.tensorboard import SummaryWriter
 
@@ -243,8 +245,7 @@ if(TRAIN==1):
     
     
     
-    # 📉 Define loss functions for training and evaluation
-    import torch.nn.functional as F
+
     
     def loss_fn(output, target):
         # 🪟 Clip the target values to be within the range [0, 1]
