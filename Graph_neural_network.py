@@ -38,7 +38,7 @@ model_path_2a3='best_model_2a3.pth.tar'
 reactivity_2a3=0
 reactivity_dms=1
 n_epochs = 2
-
+batch_size=2
 
 
 if(reactivity_2a3):
@@ -240,8 +240,8 @@ if(TRAIN==1):
     train_dataset, val_dataset = random_split(full_train_dataset, [train_size, val_size],generator1)
     
     
-    train_dataloader = DataLoader(train_dataset, batch_size=3, shuffle=True, num_workers=8)  # 📦 Training data loader
-    val_dataloader = DataLoader(val_dataset, batch_size=3, shuffle=False, num_workers=8)  # 📦 Validation data loader
+    train_dataloader = DataLoader(train_dataset, batch_size=batch_size, shuffle=True, num_workers=8)  # 📦 Training data loader
+    val_dataloader = DataLoader(val_dataset, batch_size=batch_size, shuffle=False, num_workers=8)  # 📦 Validation data loader
     
     
     
@@ -299,7 +299,7 @@ if(TRAIN==1):
         train_losses = []
         train_maes = []
         model.train()
-        batch_idx=0
+        
         # 🚞 Iterate over batches in the training dataloader
         for batch in (pbar := tqdm(train_dataloader, position=0, leave=True)):
             batch = batch.to(device)
@@ -316,9 +316,10 @@ if(TRAIN==1):
             optimizer.step()
             pbar.set_description(f"Train loss {loss.detach().cpu().numpy():.4f}")
         
-            # Write loss to TensorBoard
-            writer.add_scalar('Loss/train', loss.item(), epoch * len(train_dataloader) + batch_idx)
-            batch_idx+=1
+        # Write loss to TensorBoard
+        writer.add_scalar('Loss vs epoch /train', np.mean(train_losses), epoch )
+        writer.add_scalar('MAE vs epoch /train', np.mean(train_maes), epoch )
+            
             
             
         # 📊 Print average training loss and MAE for the epoch
@@ -343,6 +344,8 @@ if(TRAIN==1):
             val_maes.append(mae.detach().cpu().numpy())
             pbar.set_description(f"Validation loss {loss.detach().cpu().numpy():.4f}")
             
+        writer.add_scalar('Loss vs epoch / test', np.mean(val_losses), epoch )
+        writer.add_scalar('MAE vs epoch / test', np.mean(val_maes), epoch )   
             
         if(np.mean(val_maes) <= min_MAE):
             torch.save({"epoch": epoch + 1,
@@ -387,7 +390,7 @@ else:
     
     final_test_dataset = SimpleGraphDataset(parquet_name=TEST_PARQUET_FILE, edge_distance=EDGE_DISTANCE,train=0)
     
-    final_test_dataloader=DataLoader(final_test_dataset, batch_size=2, shuffle=False, num_workers=2)
+    final_test_dataloader=DataLoader(final_test_dataset, batch_size=batch_size, shuffle=False, num_workers=2)
 
     
     with open(PRED_CSV, 'a', newline='') as csv_file:
