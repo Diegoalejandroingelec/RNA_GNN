@@ -168,7 +168,7 @@ class SimpleGraphDataset(Dataset):
         self.df = pl.read_parquet(self.parquet_name)
         # 📊 Filter the dataframe by 'SN_filter' column where the value is 1.0
         if(train==1):
-            #self.df = self.df.filter(pl.col("SN_filter") == 1.0) #ACTIVATE TO TRAIN REAL DATASET!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+            self.df = self.df.filter(pl.col("SN_filter") == 1.0) #ACTIVATE TO TRAIN REAL DATASET!!!!!!!!!!!!!!!!!!!!!!!!!!!!
             if(reactivity_2a3==1):
                 self.df = self.df.filter(pl.col("experiment_type") == '2A3_MaP')
             if(reactivity_dms==1):
@@ -223,7 +223,7 @@ class SimpleGraphDataset(Dataset):
             x_length=torch.from_numpy(np.array([len(node_features)-1])).to(dtype=torch.int)
             # 📊 Create a PyTorch Data object
             
-            #print(edge_index)
+            
             data = Data(x=node_features,
                         edge_index=edge_index,
                         y=targets,
