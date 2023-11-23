@@ -242,7 +242,11 @@ class SimpleGraphDataset(Dataset):
             # 📏 Get the sequence length
             sequence_length = len(sequence)
             # 📊 Get the edge index using nearest adjacency function
-            edges_np = nearest_adjacency(sequence_length, n=self.edge_distance, loops=False)
+            #edges_np = nearest_adjacency(sequence_length, n=self.edge_distance, loops=False)
+            rna_seq = RNA.fold_compound(sequence_row[0])
+            structure, _ = rna_seq.mfe()
+            edges_np=generate_adjancecies(structure)
+            
             # 📏 Convert the edge index to a torch tensor
             edge_index = torch.tensor(edges_np, dtype=torch.long)
             
