@@ -6,6 +6,7 @@ Created on Fri Oct 13 15:15:35 2023
 @author: diego
 
 """
+import RNA
 import csv
 import torch  # 🔥 Import PyTorch for deep learning
 from torch.utils.data import random_split  # 📂 For splitting datasets
@@ -73,6 +74,44 @@ def to_parquet(csv_file, parquet_file):
 to_parquet(TRAIN_CSV, TRAIN_PARQUET_FILE)  # 🚆 Training data
 to_parquet(TEST_CSV, TEST_PARQUET_FILE)    # 🚀 Test data
 
+
+def generate_adjancecies(structure):
+    a = []
+    b = []
+    c = []
+    d = []
+    
+    for i in range(2):
+        a.append([])
+        b.append([])
+        c.append([])
+        d.append([])
+    
+    stack = []
+    
+    idx = 0
+    for char in structure:
+        if char == '(':
+            stack.append(idx)
+        elif char == ')':
+            topIdx = stack.pop()
+            c[0].append(idx)
+            c[1].append(topIdx)
+            d[0].append(topIdx)
+            d[1].append(idx)
+        
+        if idx < len(structure) - 1:
+            a[0].append(idx+1)
+            a[1].append(idx)
+            b[0].append(idx)
+            b[1].append(idx+1)
+        
+        idx +=1
+    a = np.array(a)
+    b = np.array(b)
+    c = np.array(c)
+    d = np.array(d)
+    return np.hstack([a,b,c,d])
 
 
 def nearest_adjacency(sequence_length, n=2, loops=True):
@@ -162,7 +201,10 @@ class SimpleGraphDataset(Dataset):
             # 📏 Get the sequence length
             sequence_length = len(sequence)
             # 📊 Get the edge index using nearest adjacency function
-            edges_np = nearest_adjacency(sequence_length, n=self.edge_distance, loops=False)
+            #edges_np = nearest_adjacency(sequence_length, n=self.edge_distance, loops=False)
+            rna_seq = RNA.fold_compound(sequence_row[0])
+            structure, _ = rna_seq.mfe()
+            edges_np=generate_adjancecies(structure)
             # 📏 Convert the edge index to a torch tensor
             edge_index = torch.tensor(edges_np, dtype=torch.long)
             # 🧬 Get reactivity targets for nodes
@@ -181,7 +223,7 @@ class SimpleGraphDataset(Dataset):
             x_length=torch.from_numpy(np.array([len(node_features)-1])).to(dtype=torch.int)
             # 📊 Create a PyTorch Data object
             
-            
+            #print(edge_index)
             data = Data(x=node_features,
                         edge_index=edge_index,
                         y=targets,
